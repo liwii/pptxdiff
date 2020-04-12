@@ -42,10 +42,10 @@ class LCS:
         while len(trace) > 0:
             lr = trace.pop()
             if lr[0] is None:
-                cur_diff = ((cur_diff[0][0] + 1, cur_diff[0][1]), cur_diff[1])
+                cur_diff = (cur_diff[0], (cur_diff[1][0] + 1, cur_diff[1][1]))
                 ridx += 1
             elif lr[1] is None:
-                cur_diff = (cur_diff[0], (cur_diff[1][0] + 1, cur_diff[1][1]))
+                cur_diff = ((cur_diff[0][0] + 1, cur_diff[0][1]), cur_diff[1])
                 lidx += 1
             else:
                 if cur_diff[0][0] > 0 or cur_diff[1][0] > 0:

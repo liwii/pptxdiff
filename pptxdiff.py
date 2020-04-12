@@ -18,9 +18,9 @@ def labels(length, idx, head):
 def show_diff(lines1, lines2, idx1, idx2):
     labels1 = ", ".join(labels(len(lines1), idx1, "Slide"))
     labels2 = ", ".join(labels(len(lines2), idx2, "Slide"))
-    if not labels1:
+    if lines1 == []:
         print(labels1 + " a " + labels2)
-    elif not labels2:
+    elif lines2 == []:
         print(labels1 + " d " + labels2)
     else:
         print(labels1 + " c " + labels2)
