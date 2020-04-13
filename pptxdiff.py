@@ -7,7 +7,7 @@ def head(ls):
     return ls[0] if ls else None
 
 def slide_repr(slide, slide_size):
-    return [shape_repr(shape, slide_size) for shape in slide.shapes]
+    return list(filter(None, [shape_repr(shape, slide_size) for shape in slide.shapes]))
 
 def labels(length, idx, head):
     if length > 0:
@@ -15,20 +15,81 @@ def labels(length, idx, head):
     else:
         return [head + str(idx)]
 
+def matchings(lines1, lines2):
+    lcs_idxs = []
+    for i in range(len(lines1)):
+        for j in range(len(lines2)):
+            lcs_idxs.append(((i, j), LCS(lines1[i], lines2[j])))
+    list.sort(lcs_idxs, key=lambda li: li[1].size)
+    ranges1 = [(0, len(lines2) - 1) for _ in range(len(lines1))]
+    ranges2 = [(0, len(lines1) - 1) for _ in range(len(lines2))]
+    matches1 = [None for _ in range(len(lines1))]
+    matches2 = [None for _ in range(len(lines2))]
+    while len(lcs_idxs) > 0:
+        (i, j), lcs = lcs_idxs.pop()
+        if matches1[i] is not None or matches2[j] is not None:
+            continue
+        if ranges1[i][0] > j or ranges1[i][1] < j or ranges2[j][0] > i or ranges2[j][1] < i:
+            continue
+        matches1[i] = (j, lcs)
+        matches2[j] = (i, lcs)
+        for i_ in range(len(lines1)):
+            if i_ < i:
+                ranges1[i_] = (ranges1[i_][0], min(ranges1[i_][1], j - 1))
+            if i_ > i:
+                ranges1[i_] = (max(ranges1[i_][0], j + 1), ranges1[i_][1])
+        for j_ in range(len(lines2)):
+            if j_ < j:
+                ranges2[j_] = (ranges2[j_][0], min(ranges2[j_][1], i - 1))
+            if j_ > j:
+                ranges2[j_] = (max(ranges2[j_][0], i + 1), ranges2[j_][1])
+    idx1 = 0
+    idx2 = 0
+    result = []
+    while True:
+        while idx1 < len(matches1) and matches1[idx1] is None:
+            result.append((idx1, None, None))
+            idx1 += 1
+        while idx2 < len(matches2) and matches2[idx2] is None:
+            result.append((None, idx2, None))
+            idx2 += 1
+        if idx1 == len(matches1) or idx2 == len(matches2):
+            break
+        result.append((idx1, idx2, matches1[idx1][1]))
+        idx1 += 1
+        idx2 += 1
+    return result
+
 def show_diff(lines1, lines2, idx1, idx2):
-    labels1 = ", ".join(labels(len(lines1), idx1, "Slide"))
-    labels2 = ", ".join(labels(len(lines2), idx2, "Slide"))
-    if lines1 == []:
-        print(labels1 + " a " + labels2)
-    elif lines2 == []:
-        print(labels1 + " d " + labels2)
-    else:
-        print(labels1 + " c " + labels2)
-    print("<<<")
-    print("\n---\n".join(["\n".join(els) for els in lines1]))
-    print(">>>")
-    print("\n---\n".join(["\n".join(els) for els in lines2]))
-    print()
+    m = matchings(lines1, lines2)
+    for i, j, lcs in m:
+        label1 = "Slide" + str(idx1 + 1)
+        label2 = "Slide" + str(idx2 + 1)
+        if i is None:
+            els1 = ""
+            els2 = "\n".join(lines2[j])
+            idx2 += 1
+        elif j is None:
+            els1 = "\n".join(lines1[i])
+            els2 = ""
+            idx1 += 1
+        else:
+            diff1, diff2 = lcs.diff_collection()
+            els1 = "\n".join([lines1[i][n] for n in diff1])
+            els2 = "\n".join([lines2[j][m] for m in diff2])
+            idx1 += 1
+            idx2 += 1
+        if els1 == "":
+            print(label1 + " a " + label2)
+        elif els2 == "":
+            print(label1 + " d " + label2)
+        else:
+            print(label1 + " c " + label2)
+        print("<<<")
+        print(els1)
+        print(">>>")
+        print(els2)
+        print()
     
 
 def main(file1, file2):

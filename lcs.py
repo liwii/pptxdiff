@@ -33,6 +33,17 @@ class LCS:
             start = step
         self.trace = trace
 
+    def diff_collection(self):
+        trace = copy.deepcopy(self.trace)
+        diffs = ([], [])
+        while len(trace) > 0:
+            l, r = trace.pop()
+            if r is None:
+                diffs[0].append(l)
+            if l is None:
+                diffs[1].append(r)
+        return diffs
+
     def diff(self):
         trace = copy.deepcopy(self.trace)
         diffs = []
