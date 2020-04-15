@@ -7,7 +7,7 @@ def head(ls):
     return ls[0] if ls else None
 
 def slide_repr(slide, slide_size):
-    return list(filter(None, [shape_repr(shape, slide_size) for shape in slide.shapes]))
+    return shape_repr(slide.shapes, slide_size)
 
 def labels(length, idx, head):
     if length > 0:
