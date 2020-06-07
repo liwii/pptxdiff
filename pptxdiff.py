@@ -1,13 +1,13 @@
 import sys
 import os 
 from pptx import Presentation
-from serialize import shape_repr
+from serialize import shapes_repr
 from lcs import LCS
 def head(ls):
     return ls[0] if ls else None
 
 def slide_repr(slide, slide_size):
-    return shape_repr(slide.shapes, slide_size)
+    return shapes_repr(slide.shapes, slide_size)
 
 def labels(length, idx, head):
     if length > 0:
